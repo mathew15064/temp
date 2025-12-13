@@ -5,77 +5,38 @@ const t = initTRPC.create();
 const publicProcedure = t.procedure;
 
 const appRouter = t.router({
-  products: t.router({
-    getProductById: publicProcedure.input(z.object({ id: z.string() })).output(z.object({
-      id: z.string(),
-      name: z.string(),
-      price: z.number(),
-      details: z.object({
-        description: z.string().optional(),
-        rating: z.number().optional(),
+  users: t.router({
+    list: publicProcedure.input(z.object({
+      email: z.string().email().optional(),
+      name: z.string().optional(),
+      page: z.number().int().positive().default(1),
+      limit: z.number().int().positive().max(100).default(10),
+      sortBy: z.enum(['createdAt', 'email', 'name']).default('createdAt'),
+      sortOrder: z.enum(['asc', 'desc']).default('desc'),
+    })).output(z.object({
+      data: z.array(z.object({
+        id: z.number(),
+        email: z.string().email(),
+        name: z.string().nullable(),
+        createdAt: z.date().optional(),
+        updatedAt: z.date().optional(),
+      })),
+      pagination: z.object({
+        page: z.number(),
+        limit: z.number(),
+        total: z.number(),
+        totalPages: z.number(),
       }),
     })).query(async () => "PLACEHOLDER_DO_NOT_REMOVE" as any),
-    getAllProducts: publicProcedure.output(z.array(z.object({
-      id: z.string(),
-      name: z.string(),
-      price: z.number(),
-      details: z.object({
-        description: z.string().optional(),
-        rating: z.number().optional(),
-      }),
-    }))).query(async () => "PLACEHOLDER_DO_NOT_REMOVE" as any),
-    updateProduct: publicProcedure.input(z.object({
-      id: z.string(),
-      data: z.object({
-        id: z.string(),
-        name: z.string(),
-        price: z.number(),
-        details: z.object({
-          description: z.string().optional(),
-          rating: z.number().optional(),
-        }),
-      }).partial(),
+    findOne: publicProcedure.input(z.object({
+      id: z.number().int().positive(),
     })).output(z.object({
-      id: z.string(),
-      name: z.string(),
-      price: z.number(),
-      details: z.object({
-        description: z.string().optional(),
-        rating: z.number().optional(),
-      }),
-    })).mutation(async () => "PLACEHOLDER_DO_NOT_REMOVE" as any),
-    createProduct: publicProcedure.input(z.object({
-      id: z.string(),
-      name: z.string(),
-      price: z.number(),
-      details: z.object({
-        description: z.string().optional(),
-        rating: z.number().optional(),
-      }),
-    })).output(z.object({
-      id: z.string(),
-      name: z.string(),
-      price: z.number(),
-      details: z.object({
-        description: z.string().optional(),
-        rating: z.number().optional(),
-      }),
-    })).mutation(async () => "PLACEHOLDER_DO_NOT_REMOVE" as any),
-    deleteProduct: publicProcedure.input(z.object({ id: z.string() })).output(z.boolean()).mutation(async () => "PLACEHOLDER_DO_NOT_REMOVE" as any)
-  }),
-  users: t.router({
-    getAll: publicProcedure.input(z.object({
-      email: z.string().email().optional(),
-      name: z.string().email().optional(),
-    })).output(z.object({
+      id: z.number(),
       email: z.string().email(),
-
-      name: z
-        .string()
-        .min(1, { message: 'Name must not be empty' })
-        .optional()
-        .nullable(),
-    }).nullable()).query(async () => "PLACEHOLDER_DO_NOT_REMOVE" as any),
+      name: z.string().nullable(),
+      createdAt: z.date().optional(),
+      updatedAt: z.date().optional(),
+    })).query(async () => "PLACEHOLDER_DO_NOT_REMOVE" as any),
     create: publicProcedure.input(z.object({
       email: z
         .string({ required_error: 'Email is required' })
@@ -87,13 +48,34 @@ const appRouter = t.router({
         .string({ required_error: 'Password is required' })
         .min(6, { message: 'Password must be at least 6 characters long' }),
     })).output(z.object({
+      id: z.number(),
       email: z.string().email(),
-
-      name: z
-        .string()
-        .min(1, { message: 'Name must not be empty' })
-        .optional()
-        .nullable(),
+      name: z.string().nullable(),
+      createdAt: z.date().optional(),
+      updatedAt: z.date().optional(),
+    })).mutation(async () => "PLACEHOLDER_DO_NOT_REMOVE" as any),
+    update: publicProcedure.input(z.object({
+      id: z.number().int().positive(),
+      data: z.object({
+        email: z.string().email().optional(),
+        name: z.string().max(255).optional(),
+        password: z.string().min(6).optional(),
+      }),
+    })).output(z.object({
+      id: z.number(),
+      email: z.string().email(),
+      name: z.string().nullable(),
+      createdAt: z.date().optional(),
+      updatedAt: z.date().optional(),
+    })).mutation(async () => "PLACEHOLDER_DO_NOT_REMOVE" as any),
+    delete: publicProcedure.input(z.object({
+      id: z.number().int().positive(),
+    })).output(z.object({
+      id: z.number(),
+      email: z.string().email(),
+      name: z.string().nullable(),
+      createdAt: z.date().optional(),
+      updatedAt: z.date().optional(),
     })).mutation(async () => "PLACEHOLDER_DO_NOT_REMOVE" as any)
   }),
   auth: t.router({

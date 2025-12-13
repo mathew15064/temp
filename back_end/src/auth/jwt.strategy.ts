@@ -9,12 +9,14 @@ export interface JwtPayload {
 }
 
 @Injectable()
+// JWT Strategy for authentication
 export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
+
   constructor(private authService: AuthService) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
-      secretOrKey: process.env.JWT_ACCESS_SECRET || 'your-secret-key-fallback',
+      secretOrKey: process.env.JWT_ACCESS_SECRET || 'defaultSecretKey',
     });
     
     // Throw error if JWT_ACCESS_SECRET is not set in production

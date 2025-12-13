@@ -1,4 +1,3 @@
-// ====== Start import areas ======
 import {
   Ctx,
   Input,
@@ -22,7 +21,6 @@ import { AuthGuardMiddleware } from '../trpc/middleware/auth-guard.middleware';
 import { IAppContext } from '../trpc/context/context.interface';
 import { TRPCError } from '@trpc/server';
 import { z } from 'zod';
-// ====== End import areas ======
 
 // Author Router
 @Router({ alias: 'auth' })

@@ -1,31 +1,31 @@
-// ====== Start import areas ======
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from '../prisma/prisma.service';
 import * as bcrypt from 'bcrypt';
 import { RegisterInputSchemaType, LoginInputSchemaType, AuthResponseSchemaType } from './auth.schema';
 import { UserRepository } from 'src/users/user.repository';
-// ====== End import areas ======
 
 
 @Injectable()
 // Auth Service
 export class AuthService {
+
   constructor(
     private prisma: PrismaService,
     private jwtService: JwtService,
     private userRepository: UserRepository,
   ) {}
 
+
   /**
    * @function register
    *
    * @description Function handling user registration
-   * @param {RegisterInputSchemaType} request - User name
-   * @returns { Promise<User>} Created user instance
+   * @param {RegisterInputSchemaType} request - Register input data
+   * @returns { Promise<AuthResponseSchemaType>} Return auth response instance
    */
-
   async register(request: RegisterInputSchemaType): Promise<AuthResponseSchemaType> {
+
     // Check if user exists
     const existingUser = await this.userRepository.findByEmail(request.email);
 
@@ -61,25 +61,31 @@ export class AuthService {
     };
   }
 
-  async login(input: LoginInputSchemaType): Promise<AuthResponseSchemaType> {
+
+  /**
+   * @function login
+   *
+   * @description Function handling user login
+   * @param {LoginInputSchemaType} request - Register input data
+   * @returns { Promise<AuthResponseSchemaType>} Return auth response instance
+   */
+  async login(request: LoginInputSchemaType): Promise<AuthResponseSchemaType> {
     // Find user
-    const user = await this.prisma.user.findUnique({
-      where: { email: input.email },
-    });
+    const user = await this.userRepository.findByEmail(request.email);
 
     if (!user) {
       throw new UnauthorizedException('Invalid credentials');
     }
 
     // Verify password
-    const isPasswordValid = await bcrypt.compare(input.password, user.password);
+    const isPasswordValid = await bcrypt.compare(request.password, user.password);
 
     if (!isPasswordValid) {
       throw new UnauthorizedException('Invalid credentials');
     }
 
     // Generate tokens
-    const tokens = await this.generateTokens(user.id, user.email, input.isRefreshLogin);
+    const tokens = await this.generateTokens(user.id, user.email, request.isRefreshLogin);
 
     // Save refresh token
     if (tokens.refreshToken) {
@@ -96,15 +102,25 @@ export class AuthService {
     };
   }
 
+  
+
+  /**
+   * @function refreshTokens
+   *
+   * @description Function handling user refresh tokens
+   * @param {number} userId - User id
+   * @param {string} refreshToken - User's refresh token
+   * @returns { Promise<AuthResponseSchemaType>} Return auth response instance
+   */
   async refreshTokens(userId: number, refreshToken: string): Promise<AuthResponseSchemaType> {
-    const user = await this.prisma.user.findUnique({
-      where: { id: userId },
-    });
+    // Find user
+    const user = await this.userRepository.findById(userId);
 
     if (!user || !user.refreshToken) {
       throw new UnauthorizedException('Access Denied');
     }
 
+    // Verify refresh token
     const refreshTokenMatches = await bcrypt.compare(
       refreshToken,
       user.refreshToken,
@@ -114,6 +130,7 @@ export class AuthService {
       throw new UnauthorizedException('Access Denied');
     }
 
+    // Generate new tokens
     const tokens = await this.generateTokens(user.id, user.email, true);
 
     if (tokens.refreshToken) {
@@ -130,11 +147,19 @@ export class AuthService {
     };
   }
 
-  async logout(userId: number): Promise<void> {
-    await this.prisma.user.update({
-      where: { id: userId },
-      data: { refreshToken: null },
-    });
+
+  /**
+   * @function logout
+   *
+   * @description Function handling user logout
+   * @param {number} userId - User id
+   * @param {string} refreshToken - User's refresh token
+   * @returns { Promise<{ message: string }>} Return logout message
+   */
+  async logout(userId: number): Promise<{ message: string }> {
+    await this.userRepository.updateLogout(userId);
+
+    return { message: 'Logout successful' };
   }
 
 
@@ -146,9 +171,8 @@ export class AuthService {
    * @param {email} email - User name
    * @param {boolean} isRefreshLogin = false - User name
    * 
-   * @returns {accessToken: string, refreshToken: string?} Object containing access and refresh tokens
+   * @returns {accessToken: string, refreshToken: string?} Return object containing access and refresh tokens
    */
-
   private async generateTokens(userId: number, email: string, isRefreshLogin: boolean = false) {
     
     if (!isRefreshLogin) {
@@ -174,12 +198,21 @@ export class AuthService {
     return { accessToken, refreshToken };
   }
 
+
+  /**
+   * @function updateRefreshToken
+   *
+   * @description Function handling update user's refresh tokens
+   * @param {number} userId - User id
+   * @param {string} refreshToken - Refresh token
+   * 
+   * @returns {Promise<User>} Return user instance
+   */
   private async updateRefreshToken(userId: number, refreshToken: string) {
+
     const hashedRefreshToken = await bcrypt.hash(refreshToken, 10);
-    await this.prisma.user.update({
-      where: { id: userId },
-      data: { refreshToken: hashedRefreshToken },
-    });
+    
+    return await this.userRepository.updateRefreshToken(userId, hashedRefreshToken);
   }
 
   async validateUser(userId: number) {

@@ -1,3 +1,4 @@
+// ====== Start import areas ======
 import {
   Ctx,
   Input,
@@ -11,29 +12,45 @@ import {
   registerSchema, 
   loginSchema, 
   refreshTokenSchema,
-  RegisterInput,
-  LoginInput,
-  RefreshTokenInput,
+  RegisterInputSchemaType,
+  LoginInputSchemaType,
+  RefreshTokenInputSchemaType,
   authResponseSchema,
 } from './auth.schema';
 import { LoggerMiddleware } from '../trpc/middleware/logger.midleware';
+import { AuthGuardMiddleware } from '../trpc/middleware/auth-guard.middleware';
 import { IAppContext } from '../trpc/context/context.interface';
 import { TRPCError } from '@trpc/server';
 import { z } from 'zod';
+// ====== End import areas ======
 
+// Author Router
 @Router({ alias: 'auth' })
+// Logger middleware applied to all routes in this router
 @UseMiddlewares(LoggerMiddleware)
+
 export class AuthRouter {
   constructor(private readonly authService: AuthService) {}
 
+
+  /**
+   * @function register
+   *
+   * @description Register a new user
+   * @param {RegisterInputSchemaType} request - User name
+   * @returns { Promise<User[]>} Created user instance
+   */
+  
   @Mutation({
     input: registerSchema,
     output: authResponseSchema,
   })
-  async register(@Input() input: RegisterInput) {
+  async register(@Input() request: RegisterInputSchemaType) {
     try {
-      return await this.authService.register(input);
+      
+      return await this.authService.register(request);
     } catch (error) {
+
       throw new TRPCError({
         code: 'BAD_REQUEST',
         message: error.message || 'Registration failed',
@@ -46,7 +63,7 @@ export class AuthRouter {
     input: loginSchema,
     output: authResponseSchema,
   })
-  async login(@Input() input: LoginInput) {
+  async login(@Input() input: LoginInputSchemaType) {
     try {
       return await this.authService.login(input);
     } catch (error) {
@@ -62,7 +79,7 @@ export class AuthRouter {
     input: refreshTokenSchema,
     output: authResponseSchema,
   })
-  async refresh(@Input() input: RefreshTokenInput, @Ctx() context: IAppContext) {
+  async refresh(@Input() input: RefreshTokenInputSchemaType, @Ctx() context: IAppContext) {
     try {
       // Decode refresh token to get user ID
       const decoded = await this.authService['jwtService'].verifyAsync(
@@ -82,13 +99,11 @@ export class AuthRouter {
     }
   }
 
-  // ------------------------------------
-  // MUTATION: Logout user
-  // ------------------------------------
+
   @Mutation({
-    input: z.void().optional(),
     output: z.object({ success: z.boolean() }),
   })
+  @UseMiddlewares(AuthGuardMiddleware)
   async logout(@Ctx() context: IAppContext) {
     if (!context.user) {
       throw new TRPCError({
@@ -101,9 +116,7 @@ export class AuthRouter {
     return { success: true };
   }
 
-  // ------------------------------------
-  // QUERY: Get current authenticated user
-  // ------------------------------------
+
   @Query({
     input: z.void().optional(),
     output: z.object({
@@ -114,6 +127,7 @@ export class AuthRouter {
       updatedAt: z.date(),
     }),
   })
+  @UseMiddlewares(AuthGuardMiddleware)
   async me(@Ctx() context: IAppContext) {
     if (!context.user) {
       throw new TRPCError({
@@ -125,9 +139,6 @@ export class AuthRouter {
     return context.user;
   }
 
-  // ------------------------------------
-  // QUERY: Validate token (check if token is still valid)
-  // ------------------------------------
   @Query({
     input: z.void().optional(),
     output: z.object({
@@ -139,6 +150,7 @@ export class AuthRouter {
       }).nullable(),
     }),
   })
+  @UseMiddlewares(AuthGuardMiddleware)
   async validateToken(@Ctx() context: IAppContext) {
     return {
       valid: !!context.user,

@@ -5,7 +5,7 @@ import { AuthService } from './auth.service';
 import { AuthRouter } from './auth.router';
 import { JwtStrategy } from './jwt.strategy';
 import { PrismaModule } from '../prisma/prisma.module';
-
+import { UserRepository } from 'src/users/user.repository';
 @Module({
   imports: [
     PrismaModule,
@@ -15,7 +15,7 @@ import { PrismaModule } from '../prisma/prisma.module';
       signOptions: { expiresIn: '15m' },
     }),
   ],
-  providers: [AuthService, AuthRouter, JwtStrategy],
+  providers: [AuthService, AuthRouter, JwtStrategy, UserRepository],
   exports: [AuthService, AuthRouter],
 })
 export class AuthModule {}

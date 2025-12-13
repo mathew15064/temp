@@ -10,14 +10,14 @@ import { AuthModule } from './auth/auth.module';
   imports: [
     // ConfigModule must be first to load environment variables
     ConfigModule.forRoot({
-      isGlobal: true, // Makes ConfigService available everywhere
-      envFilePath: '.env', // Path to your .env file
+      isGlobal: true,
+      envFilePath: '.env',
     }),
     PrismaModule,
     TrpcModule,
     ProductsModule,
     UsersModule,
-    AuthModule, // Add AuthModule
+    AuthModule,
   ],
 })
 export class AppModule {}

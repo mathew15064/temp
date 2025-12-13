@@ -6,12 +6,14 @@ import { LoggerMiddleware } from './middleware/logger.midleware';
 import { AuthGuardMiddleware } from './middleware/auth-guard.middleware';
 import { AppContext } from './context/app.context';
 import { PrismaModule } from '../prisma/prisma.module';
+import { errorFormatter } from './error-formatter';
 
 @Module({
   imports: [
     TRPCModule.forRoot({
       autoSchemaFile: 'src/trpc/@generated',
       context: AppContext,
+      errorFormatter
     }),
     PrismaModule,
     JwtModule.register({

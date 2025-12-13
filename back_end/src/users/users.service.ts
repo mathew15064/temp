@@ -2,10 +2,15 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { user as User, Prisma } from '../../generated/prisma/client';
-import {User as UserSchema} from './users.schema';
+import {User as UserSchema, UserWhereUniqueInputSchemaType} from './users.schema';
 @Injectable()
 export class UsersService {
   constructor(private prisma: PrismaService) {}
+
+
+   async getAll(params: UserWhereUniqueInputSchemaType): Promise<User[]> {
+    return this.prisma.user.findMany({});
+  }
 
   async user(
     {id, email} : {id?: number; email?: string}
@@ -28,29 +33,21 @@ export class UsersService {
   //   return this.prisma.user.create({user});
   // }
   
-  
-    async createUser(data: Prisma.userCreateInput): Promise<User> {
-    return this.prisma.user.create({
-      data
-    })
-  }
 
-  // async users(params: {
-  //   skip?: number;
-  //   take?: number;
-  //   cursor?: Prisma.UserWhereUniqueInput;
-  //   where?: Prisma.UserWhereInput;
-  //   orderBy?: Prisma.UserOrderByWithRelationInput;
-  // }): Promise<User[]> {
-  //   const { skip, take, cursor, where, orderBy } = params;
-  //   return this.prisma.user.findMany({
-  //     skip,
-  //     take,
-  //     cursor,
-  //     where,
-  //     orderBy,
-  //   });
-  // }
+  
+  /**
+   * @function create
+   *
+   * @description Create a new user into db
+   * @param {Prisma.userCreateInput} data - User schema type
+   * @returns {Promise<User>} Created user instance
+   */
+  
+    async create(data: Prisma.userCreateInput): Promise<User> {
+      return this.prisma.user.create({data})
+    }
+
+ 
 
 
 

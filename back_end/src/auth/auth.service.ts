@@ -1,36 +1,46 @@
+// ====== Start import areas ======
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from '../prisma/prisma.service';
 import * as bcrypt from 'bcrypt';
-import { RegisterInput, LoginInput, AuthResponse } from './auth.schema';
+import { RegisterInputSchemaType, LoginInputSchemaType, AuthResponseSchemaType } from './auth.schema';
+import { UserRepository } from 'src/users/user.repository';
+// ====== End import areas ======
+
 
 @Injectable()
+// Auth Service
 export class AuthService {
   constructor(
     private prisma: PrismaService,
     private jwtService: JwtService,
+    private userRepository: UserRepository,
   ) {}
 
-  async register(input: RegisterInput): Promise<AuthResponse> {
+  /**
+   * @function register
+   *
+   * @description Function handling user registration
+   * @param {RegisterInputSchemaType} request - User name
+   * @returns { Promise<User>} Created user instance
+   */
+
+  async register(request: RegisterInputSchemaType): Promise<AuthResponseSchemaType> {
     // Check if user exists
-    const existingUser = await this.prisma.user.findUnique({
-      where: { email: input.email },
-    });
+    const existingUser = await this.userRepository.findByEmail(request.email);
 
     if (existingUser) {
       throw new UnauthorizedException('User with this email already exists');
     }
 
     // Hash password
-    const hashedPassword = await bcrypt.hash(input.password, 10);
+    const hashedPassword = await bcrypt.hash(request.password, 10);
 
     // Create user
-    const user = await this.prisma.user.create({
-      data: {
-        email: input.email,
+    const user = await this.userRepository.create({
+        email: request.email,
         password: hashedPassword,
-        name: input.name,
-      },
+        name: request.name,
     });
 
     // Generate tokens
@@ -51,7 +61,7 @@ export class AuthService {
     };
   }
 
-  async login(input: LoginInput): Promise<AuthResponse> {
+  async login(input: LoginInputSchemaType): Promise<AuthResponseSchemaType> {
     // Find user
     const user = await this.prisma.user.findUnique({
       where: { email: input.email },
@@ -86,7 +96,7 @@ export class AuthService {
     };
   }
 
-  async refreshTokens(userId: number, refreshToken: string): Promise<AuthResponse> {
+  async refreshTokens(userId: number, refreshToken: string): Promise<AuthResponseSchemaType> {
     const user = await this.prisma.user.findUnique({
       where: { id: userId },
     });
@@ -127,7 +137,20 @@ export class AuthService {
     });
   }
 
+
+  /**
+   * @function generateTokens
+   *
+   * @description Function handling generation of access and refresh tokens
+   * @param {number} userId - User id
+   * @param {email} email - User name
+   * @param {boolean} isRefreshLogin = false - User name
+   * 
+   * @returns {accessToken: string, refreshToken: string?} Object containing access and refresh tokens
+   */
+
   private async generateTokens(userId: number, email: string, isRefreshLogin: boolean = false) {
+    
     if (!isRefreshLogin) {
       // For refresh login, only generate access token
       const accessToken = await this.jwtService.signAsync(

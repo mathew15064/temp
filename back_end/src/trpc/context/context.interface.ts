@@ -8,6 +8,7 @@ export interface IAppContext {
     id: number;
     email: string;
     name: string | null;
+    is_admin: boolean | null;
     createdAt: Date;
     updatedAt: Date;
   } | null;

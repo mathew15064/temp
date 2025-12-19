@@ -17,3 +17,6 @@ npm run dev
 
 For  prod
 npm run build && npm run start
+
+migrate
+bun prisma migrate dev --name update_posts_relation

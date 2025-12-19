@@ -10,14 +10,57 @@ datasource db {
 
 model user {
   id           Int      @id @default(autoincrement())
-  email        String   @unique(map: "email")
+  email        String   @unique(map: "uk_email")
   name         String?
   password     String
+  is_admin     Boolean? @default(false)
   refreshToken String?  @db.Text
   createdBy    Int?
   updatedBy    Int?
   createdAt    DateTime @default(now())
-  updatedAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt 
+  // Relation: Một user có thể có nhiều bài viết
+  posts        posts[]
+}
 
-  @@index([email], map: "idx_email")
+model posts {
+  id               BigInt        @id @default(autoincrement()) @db.UnsignedBigInt
+  title            String        @db.VarChar(255)
+  slug             String        @unique(map: "uk_slug") @db.VarChar(255)
+  summary          String?       @db.Text
+  content          String        @db.LongText
+  category_id      BigInt?       @db.UnsignedBigInt
+  
+  // Liên kết với user qua author_id
+  author_id        Int?
+  
+  status           posts_status? @default(draft)
+  is_featured      Boolean?      @default(false)
+  
+  meta_title       String?       @db.VarChar(255)
+  meta_description String?       @db.VarChar(500)
+  meta_keywords    String?       @db.VarChar(500)
+  
+  thumbnail_url    String?       @db.VarChar(500)
+  cover_url        String?       @db.VarChar(500)
+  
+  view_count       BigInt?       @default(0) @db.UnsignedBigInt
+  like_count       BigInt?       @default(0) @db.UnsignedBigInt
+  comment_count    BigInt?       @default(0) @db.UnsignedBigInt
+  
+  published_at     DateTime?
+  created_at       DateTime?     @default(now())
+  updated_at       DateTime?     @updatedAt @default(now()) // Thêm @updatedAt
+  deleted_at       DateTime?
+
+  // Đổi tên field quan hệ từ 'user' thành 'author' cho rõ nghĩa
+  author           user?         @relation(fields: [author_id], references: [id], onDelete: SetNull, onUpdate: Cascade, map: "fk_posts_author")
+
+  @@index([author_id], map: "idx_posts_author")
+}
+
+enum posts_status {
+  draft
+  published
+  archived
 }

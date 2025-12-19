@@ -28,11 +28,11 @@ export class UsersService {
     const where: any = {};
     
     if (email) {
-      where.email = { contains: email, mode: 'insensitive' };
+      where.email = { contains: email};
     }
     
     if (name) {
-      where.name = { contains: name, mode: 'insensitive' };
+      where.name = { contains: name};
     }
 
     // Build orderBy clause
@@ -104,6 +104,7 @@ export class UsersService {
       email: data.email,
       name: data.name,
       password: hashedPassword,
+      is_admin: data.is_admin
     });
 
     return user;
@@ -137,6 +138,7 @@ export class UsersService {
     const updateData: Prisma.userUpdateInput = {
       ...(data.email && { email: data.email }),
       ...(data.name && { name: data.name }),
+      ...((data.is_admin || data.is_admin == false) && { is_admin: data.is_admin }),
       ...(data.password && { password: await bcrypt.hash(data.password, 10) }),
     };
 
@@ -146,7 +148,7 @@ export class UsersService {
     return user;
   }
 
-  /**
+  /** 
    * @function delete
    *
    * @description Delete a user

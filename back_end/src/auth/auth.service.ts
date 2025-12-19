@@ -97,6 +97,7 @@ export class AuthService {
       user: {
         id: user.id,
         email: user.email,
+        is_admin: user.is_admin,
         name: user.name,
       },
     };
@@ -142,6 +143,7 @@ export class AuthService {
       user: {
         id: user.id,
         email: user.email,
+        is_admin: user.is_admin,
         name: user.name,
       },
     };
@@ -222,6 +224,7 @@ export class AuthService {
         id: true,
         email: true,
         name: true,
+        is_admin: true,
         createdAt: true,
         updatedAt: true,
       },

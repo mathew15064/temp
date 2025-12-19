@@ -44,6 +44,7 @@ export const authResponseSchema = z.object({
     id: z.number(),
     email: z.string(),
     name: z.string().nullable(),
+    is_admin: z.boolean().nullable().optional(), 
   }),
 });
 

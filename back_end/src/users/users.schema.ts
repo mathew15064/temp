@@ -32,6 +32,7 @@ export const userCreateSchema = z.object({
   password: z
     .string({ required_error: 'Password is required' })
     .min(6, { message: 'Password must be at least 6 characters long' }),
+  is_admin: z.boolean().optional()
 });
 
 // === User Update Schema ===
@@ -41,6 +42,7 @@ export const userUpdateSchema = z.object({
     email: z.string().email().optional(),
     name: z.string().max(255).optional(),
     password: z.string().min(6).optional(),
+    is_admin: z.boolean().optional()
   }),
 });
 
@@ -49,6 +51,7 @@ export const userSchema = z.object({
   id: z.number(),
   email: z.string().email(),
   name: z.string().nullable(),
+  is_admin: z.boolean().nullable().optional(), 
   createdAt: z.date().optional(),
   updatedAt: z.date().optional(),
 });

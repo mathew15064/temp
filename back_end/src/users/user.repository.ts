@@ -29,6 +29,7 @@ export class UserRepository {
         orderBy,
         select: {
           id: true,
+          is_admin: true,
           email: true,
           name: true,
           createdAt: true,
@@ -55,6 +56,7 @@ export class UserRepository {
         id: true,
         email: true,
         name: true,
+        is_admin: true,
         refreshToken: true,
         createdAt: true,
         updatedAt: true,
@@ -86,6 +88,7 @@ export class UserRepository {
       select: {
         id: true,
         email: true,
+        is_admin: true,
         name: true,
         createdAt: true,
         updatedAt: true,
@@ -108,6 +111,7 @@ export class UserRepository {
       select: {
         id: true,
         email: true,
+        is_admin: true,
         name: true,
         createdAt: true,
         updatedAt: true,

@@ -18,6 +18,7 @@ const appRouter = t.router({
         id: z.number(),
         email: z.string().email(),
         name: z.string().nullable(),
+        is_admin: z.boolean().nullable().optional(),
         createdAt: z.date().optional(),
         updatedAt: z.date().optional(),
       })),
@@ -34,6 +35,7 @@ const appRouter = t.router({
       id: z.number(),
       email: z.string().email(),
       name: z.string().nullable(),
+      is_admin: z.boolean().nullable().optional(),
       createdAt: z.date().optional(),
       updatedAt: z.date().optional(),
     })).query(async () => "PLACEHOLDER_DO_NOT_REMOVE" as any),
@@ -47,10 +49,12 @@ const appRouter = t.router({
       password: z
         .string({ required_error: 'Password is required' })
         .min(6, { message: 'Password must be at least 6 characters long' }),
+      is_admin: z.boolean().optional()
     })).output(z.object({
       id: z.number(),
       email: z.string().email(),
       name: z.string().nullable(),
+      is_admin: z.boolean().nullable().optional(),
       createdAt: z.date().optional(),
       updatedAt: z.date().optional(),
     })).mutation(async () => "PLACEHOLDER_DO_NOT_REMOVE" as any),
@@ -60,11 +64,13 @@ const appRouter = t.router({
         email: z.string().email().optional(),
         name: z.string().max(255).optional(),
         password: z.string().min(6).optional(),
+        is_admin: z.boolean().optional()
       }),
     })).output(z.object({
       id: z.number(),
       email: z.string().email(),
       name: z.string().nullable(),
+      is_admin: z.boolean().nullable().optional(),
       createdAt: z.date().optional(),
       updatedAt: z.date().optional(),
     })).mutation(async () => "PLACEHOLDER_DO_NOT_REMOVE" as any),
@@ -74,6 +80,7 @@ const appRouter = t.router({
       id: z.number(),
       email: z.string().email(),
       name: z.string().nullable(),
+      is_admin: z.boolean().nullable().optional(),
       createdAt: z.date().optional(),
       updatedAt: z.date().optional(),
     })).mutation(async () => "PLACEHOLDER_DO_NOT_REMOVE" as any)
@@ -98,6 +105,7 @@ const appRouter = t.router({
         id: z.number(),
         email: z.string(),
         name: z.string().nullable(),
+        is_admin: z.boolean().nullable().optional(),
       }),
     })).mutation(async () => "PLACEHOLDER_DO_NOT_REMOVE" as any),
     login: publicProcedure.input(z.object({
@@ -120,6 +128,7 @@ const appRouter = t.router({
         id: z.number(),
         email: z.string(),
         name: z.string().nullable(),
+        is_admin: z.boolean().nullable().optional(),
       }),
     })).mutation(async () => "PLACEHOLDER_DO_NOT_REMOVE" as any),
     refresh: publicProcedure.input(z.object({
@@ -133,6 +142,7 @@ const appRouter = t.router({
         id: z.number(),
         email: z.string(),
         name: z.string().nullable(),
+        is_admin: z.boolean().nullable().optional(),
       }),
     })).mutation(async () => "PLACEHOLDER_DO_NOT_REMOVE" as any),
     logout: publicProcedure.output(z.object({ success: z.boolean() })).mutation(async () => "PLACEHOLDER_DO_NOT_REMOVE" as any),
@@ -140,6 +150,7 @@ const appRouter = t.router({
       id: z.number(),
       email: z.string(),
       name: z.string().nullable(),
+      is_admin: z.boolean().optional().nullable(),
       createdAt: z.date(),
       updatedAt: z.date(),
     })).query(async () => "PLACEHOLDER_DO_NOT_REMOVE" as any),
@@ -151,6 +162,37 @@ const appRouter = t.router({
         name: z.string().nullable(),
       }).nullable(),
     })).query(async () => "PLACEHOLDER_DO_NOT_REMOVE" as any)
+  }),
+  posts: t.router({
+    list: publicProcedure.input(z.object({
+      page: z.number().default(1),
+      limit: z.number().default(10),
+      slug: z.string().optional(),
+      search: z.string().optional(),
+      status: z.enum(['draft', 'published', 'archived']).optional(),
+    })).query(async () => "PLACEHOLDER_DO_NOT_REMOVE" as any),
+    create: publicProcedure.input(z.object({
+      title: z.string().min(1),
+      content: z.string().min(1),
+      summary: z.string().optional(),
+      status: z.enum(['draft', 'published', 'archived']).default('draft'),
+      thumbnail_url: z.string().optional(),
+      is_featured: z.boolean().optional(),
+    })).mutation(async () => "PLACEHOLDER_DO_NOT_REMOVE" as any),
+    update: publicProcedure.input(z.object({
+      id: z.number({
+        required_error: "ID bài viết là bắt buộc",
+      }),
+    }).merge(z.object({
+      title: z.string().min(1),
+      content: z.string().min(1),
+      summary: z.string().optional(),
+      status: z.enum(['draft', 'published', 'archived']).default('draft'),
+      thumbnail_url: z.string().optional(),
+      is_featured: z.boolean().optional(),
+    }).partial())).mutation(async () => "PLACEHOLDER_DO_NOT_REMOVE" as any),
+    delete: publicProcedure.input(z.object({ id: z.number() })).mutation(async () => "PLACEHOLDER_DO_NOT_REMOVE" as any),
+    getBySlug: publicProcedure.input(z.object({ slug: z.string() })).query(async () => "PLACEHOLDER_DO_NOT_REMOVE" as any)
   })
 });
 export type AppRouter = typeof appRouter;

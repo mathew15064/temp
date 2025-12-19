@@ -121,6 +121,7 @@ export class AuthRouter {
       id: z.number(),
       email: z.string(),
       name: z.string().nullable(),
+      is_admin: z.boolean().optional().nullable(),
       createdAt: z.date(),
       updatedAt: z.date(),
     }),
@@ -156,6 +157,8 @@ export class AuthRouter {
         id: context.user.id,
         email: context.user.email,
         name: context.user.name,
+        is_admin: context.user.is_admin,
+        
       } : null,
     };
   }

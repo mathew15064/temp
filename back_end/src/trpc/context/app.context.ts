@@ -32,6 +32,7 @@ export class AppContext implements TRPCContext {
             id: true,
             email: true,
             name: true,
+            is_admin: true,
             createdAt: true,
             updatedAt: true,
           },

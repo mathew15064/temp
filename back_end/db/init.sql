@@ -3,12 +3,12 @@ CREATE TABLE `user` (
   `email` VARCHAR(191) NOT NULL,
   `name` VARCHAR(191) NULL,
   `password` VARCHAR(191) NOT NULL,
+  `is_admin` BOOLEAN DEFAULT FALSE,
   `refreshToken` TEXT NULL,
   `createdBy` INT NULL,
   `updatedBy` INT NULL,
   `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
   `updatedAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3),
   PRIMARY KEY (`id`),
-  UNIQUE KEY `email` (`email`),
-  INDEX `idx_email` (`email`)
+  UNIQUE KEY `uk_email` (`email`) 
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

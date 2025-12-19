@@ -10,21 +10,19 @@ services:
     ports:
       - "3306:3306"
     volumes:
-      - ./mysql/data:/var/lib/mysql
-    command: >
-      --default-authentication-plugin=mysql_native_password
-      --character-set-server=utf8mb4
-      --collation-server=utf8mb4_unicode_ci
+      - mysql8_data:/var/lib/mysql
 
   nestjs_be:
     build:
       context: ./node
-    container_name: nextjs_fe
+    container_name: nestjs_be
     working_dir: /app
     volumes:
       - ../back_end:/app
     tty: true
-    command: ["sh", "-c" ,"bun install && npm run build && npm run start"]
+    # command: ["sh", "-c" ,"bun install && npm run build && npm run start"]
+    command: ["sh"]
+    
     ports:
       - "3001:3001"
     depends_on:
@@ -38,6 +36,9 @@ services:
     volumes:
       - ../front_end:/app
     tty: true
-    command: ["sh", "-c" ,"bun install && npm run build && npm run start"]
+    command: ["sh"]
     ports:
       - "3000:3000"
+
+volumes:
+  mysql8_data:

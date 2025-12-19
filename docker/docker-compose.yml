@@ -20,9 +20,7 @@ services:
     volumes:
       - ../back_end:/app
     tty: true
-    # command: ["sh", "-c" ,"bun install && npm run build && npm run start"]
-    command: ["sh"]
-    
+    command: ["sh", "-c" ,"bun install && npm run build && npm run start"]
     ports:
       - "3001:3001"
     depends_on:
@@ -36,7 +34,7 @@ services:
     volumes:
       - ../front_end:/app
     tty: true
-    command: ["sh"]
+    command: ["sh", "-c" ,"bun install && npm run build && npm run start"]
     ports:
       - "3000:3000"
 
